@@ -14,6 +14,7 @@ namespace Digst.OioIdws.Rest.Server.Issuing
     {
         public async Task<TokenValidationResult> ValidateTokenAsync(string token, X509Certificate2 clientCertificate, OioIdwsAuthorizationServiceOptions options)
         {
+            //todo: is detecting replay attacks neccesary?
             //todo: decrypt token, test if it's an Assertion or EncryptedAssertion
             //todo validate assertion was issued by STS
             //todo validate signature value and digest

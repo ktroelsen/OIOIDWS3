@@ -21,7 +21,6 @@ namespace Digst.OioIdws.Rest.Client
 
             _client = client;
             
-            //todo: Detect token type, only add client certificate if holder-of-key
             ClientCertificates.Add(client.Settings.ClientCertificate);
         }
 

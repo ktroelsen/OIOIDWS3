@@ -83,7 +83,6 @@ namespace Digst.OioIdws.Rest.Client
                 securityToken.TokenXml.WriteTo(writer);
             }
 
-
             //todo: Detect token type, only add client certificate if holder-of-key
             var requestHandler = new WebRequestHandler
             {
