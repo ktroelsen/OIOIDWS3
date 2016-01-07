@@ -89,39 +89,42 @@ namespace Digst.OioIdws.Rest.Client
                 ClientCertificates = {Settings.ClientCertificate}
             };
 
-            var client = new HttpClient(requestHandler);
-            var response = await client.PostAsync(
-                Settings.AccessTokenIssuerEndpoint, 
-                new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("saml-token", sb.ToString())
-                }),
-                cancellationToken);
-
-            //todo handle errors related to security token
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            using (var client = new HttpClient(requestHandler))
             {
-                //todo handle www-auth header scheme?
-                //todo: proper handling of auth errors
-                var authHeader = response.Headers.WwwAuthenticate?.FirstOrDefault();
-                if (authHeader != null)
+                var response = await client.PostAsync(
+                    Settings.AccessTokenIssuerEndpoint,
+                    new FormUrlEncodedContent(new[]
+                    {
+                        new KeyValuePair<string, string>("saml-token", sb.ToString())
+                    }),
+                    cancellationToken);
+
+
+                //todo handle errors related to security token
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    throw new InvalidOperationException($"401 unauthorized: {authHeader.Parameter}");
+                    //todo handle www-auth header scheme?
+                    //todo: proper handling of auth errors
+                    var authHeader = response.Headers.WwwAuthenticate?.FirstOrDefault();
+                    if (authHeader != null)
+                    {
+                        throw new InvalidOperationException($"401 unauthorized: {authHeader.Parameter}");
+                    }
                 }
+
+                var json = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+                var jsonValue = JObject.Parse(json);
+
+                return new AccessToken
+                {
+                    Value = (string) jsonValue["access_token"],
+                    ExpiresIn = TimeSpan.FromSeconds((int) jsonValue["expires_in"]),
+                    RetrievedAtUtc = DateTime.UtcNow,
+                    Type = ParseAccessTokenType((string) jsonValue["token_type"]),
+                    TypeString = (string) jsonValue["token_type"]
+                };
             }
-
-            var json = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
-            var jsonValue = JObject.Parse(json);
-
-            return new AccessToken
-            {
-                Value = (string) jsonValue["access_token"],
-                ExpiresIn = TimeSpan.FromSeconds((int) jsonValue["expires_in"]),
-                RetrievedAtUtc = DateTime.UtcNow,
-                Type = ParseAccessTokenType((string) jsonValue["token_type"]),
-                TypeString = (string) jsonValue["token_type"]
-            };
         }
 
         private AccessTokenType ParseAccessTokenType(string type)

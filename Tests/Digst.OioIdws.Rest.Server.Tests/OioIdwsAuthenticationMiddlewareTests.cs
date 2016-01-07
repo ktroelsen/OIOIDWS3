@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Digst.OioIdws.Rest.Server.AuthorizationServer.TokenStorage;
+using Digst.OioIdws.Rest.Server.Wsp;
 using Digst.OioIdws.Test.Common;
 using Microsoft.Owin.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,7 +26,7 @@ namespace Digst.OioIdws.Rest.Server.Tests
             var identityResult = new ClaimsIdentity(new[] {new Claim(ClaimTypes.Name, "MYNAME"),});
 
             var tokenProviderMock = new Mock<ITokenProvider>();
-            tokenProviderMock.Setup(x => x.RetrieveTokenAsync(accessToken, It.IsAny<Uri>()))
+            tokenProviderMock.Setup(x => x.RetrieveTokenAsync(accessToken))
                 .ReturnsAsync(token);
 
             var identityBuilderMock = new Mock<IIdentityBuilder>();
@@ -36,9 +38,7 @@ namespace Digst.OioIdws.Rest.Server.Tests
                 app.Use<OioIdwsAuthenticationMiddleware>(app, new OioIdwsAuthenticationOptions
                 {
                     TokenProvider = tokenProviderMock.Object,
-                    AccessTokenRetrievalEndpoint = new Uri("http://dummy"),
-                    IdentityBuilder = identityBuilderMock.Object,
-                    TokenRetrievalMethod = TokenRetrievalMethod.WebService
+                    IdentityBuilder = identityBuilderMock.Object
                 })
                 .Use(async (context, next) =>
                 {
@@ -56,7 +56,7 @@ namespace Digst.OioIdws.Rest.Server.Tests
                 Assert.AreEqual("MYNAME", text);
             }
 
-            tokenProviderMock.Verify(x => x.RetrieveTokenAsync(accessToken, It.IsAny<Uri>()), Times.Once);
+            tokenProviderMock.Verify(x => x.RetrieveTokenAsync(accessToken), Times.Once);
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace Digst.OioIdws.Rest.Server.Tests
             var identityResult = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "MYNAME"), });
 
             var tokenProviderMock = new Mock<ITokenProvider>();
-            tokenProviderMock.Setup(x => x.RetrieveTokenAsync(accessToken, It.IsAny<Uri>()))
+            tokenProviderMock.Setup(x => x.RetrieveTokenAsync(accessToken))
                 .ReturnsAsync(token);
 
             var identityBuilderMock = new Mock<IIdentityBuilder>();
@@ -80,9 +80,7 @@ namespace Digst.OioIdws.Rest.Server.Tests
                 app.Use<OioIdwsAuthenticationMiddleware>(app, new OioIdwsAuthenticationOptions
                 {
                     TokenProvider = tokenProviderMock.Object,
-                    AccessTokenRetrievalEndpoint = new Uri("http://dummy"),
-                    IdentityBuilder = identityBuilderMock.Object,
-                    TokenRetrievalMethod = TokenRetrievalMethod.WebService
+                    IdentityBuilder = identityBuilderMock.Object
                 })
                 .Use(async (context, next) =>
                 {
@@ -100,7 +98,7 @@ namespace Digst.OioIdws.Rest.Server.Tests
                 Assert.AreEqual("False", text);
             }
 
-            tokenProviderMock.Verify(x => x.RetrieveTokenAsync(accessToken, It.IsAny<Uri>()), Times.Once);
+            tokenProviderMock.Verify(x => x.RetrieveTokenAsync(accessToken), Times.Once);
         }
     }
 }

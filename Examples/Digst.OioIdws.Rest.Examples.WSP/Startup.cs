@@ -1,5 +1,5 @@
 ﻿using System;
-using Digst.OioIdws.Rest.Server;
+using Digst.OioIdws.Rest.Server.Wsp;
 using Microsoft.Owin.Logging;
 using Owin;
 
@@ -15,8 +15,8 @@ namespace Digst.OioIdws.Rest.Examples.WSP
                 .UseErrorPage()
                 .UseOioIdwsAuthentication(new OioIdwsAuthenticationOptions
                 {
-                    AccessTokenRetrievalEndpoint = new Uri("https://digst.oioidws.rest.as:10001/accesstoken"),
-                    TokenRetrievalMethod = TokenRetrievalMethod.WebService
+                    TokenProvider = new RestTokenProvider(new Uri("https://digst.oioidws.rest.as:10001/accesstoken"))
+                    
                 })
                 .Use<MyService>();
         }
